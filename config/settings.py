@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -124,3 +125,23 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
+
+JAZZMIN_SETTINGS = {
+    'site_title': 'Lanchonete Admin',
+    'site_header': 'Lanchonete',
+    'site_brand': 'Lanchonete',
+    'welcome_sign': 'Bem-vindo ao painel da Lanchonete',
+    'copyright': 'Lanchonete',
+    'search_model': ['usuarios.Usuario'],
+    'show_ui_builder': False,
+    'icons': {
+        'auth': 'fas fa-users-cog',
+        'auth.Group': 'fas fa-users',
+        'usuarios.Usuario': 'fas fa-user',
+    },
+}
+
+JAZZMIN_UI_TWEAKS = {
+    'theme': 'flatly',
+    'dark_mode_theme': 'darkly',
+}
