@@ -1,10 +1,14 @@
-function App() {
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import Inicio from './pages/Inicio.jsx'
+
+export default function App() {
   return (
-    <div className="container py-5">
-      <h1>Sistema de Pedidos</h1>
-      <p className="text-secondary">Pedidos de lanchonete sem comanda de papel.</p>
-    </div>
+    <BrowserRouter>
+      <main className="container py-4">
+        <Routes>
+          <Route path="/" element={<Inicio />} />
+        </Routes>
+      </main>
+    </BrowserRouter>
   )
 }
-
-export default App
