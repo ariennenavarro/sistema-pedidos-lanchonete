@@ -1,11 +1,22 @@
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, status as http_status, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
 
 from usuarios.models import Usuario
-from usuarios.permissions import AdministradorOuSomenteLeitura, eh_administrador
+from usuarios.permissions import (
+    AdministradorOuSomenteLeitura,
+    AtendenteOuAdministrador,
+    eh_administrador,
+)
 
 from .models import Categoria, Pedido, Produto
-from .serializers import CategoriaSerializer, PedidoSerializer, ProdutoSerializer
+from .serializers import (
+    CategoriaSerializer,
+    PedidoSerializer,
+    ProdutoSerializer,
+    StatusPedidoSerializer,
+)
 
 
 class CategoriaViewSet(viewsets.ModelViewSet):
@@ -21,7 +32,6 @@ class ProdutoViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         produtos = Produto.objects.select_related('categoria')
 
-        # Cliente e atendente só veem o que está à venda
         if not eh_administrador(self.request.user):
             produtos = produtos.filter(disponivel=True)
 
@@ -29,6 +39,7 @@ class ProdutoViewSet(viewsets.ModelViewSet):
         if categoria:
             produtos = produtos.filter(categoria_id=categoria)
         return produtos
+
 
 class PedidoViewSet(
     mixins.CreateModelMixin,
@@ -54,3 +65,38 @@ class PedidoViewSet(
         if self.request.user.perfil != Usuario.Perfil.CLIENTE:
             raise PermissionDenied('Apenas clientes podem fazer pedidos.')
         serializer.save(cliente=self.request.user)
+
+    @action(detail=True, methods=['post'], permission_classes=[AtendenteOuAdministrador])
+    def status(self, request, pk=None):
+        pedido = self.get_object()
+        serializer = StatusPedidoSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        novo_status = serializer.validated_data['status']
+
+        if not pedido.pode_mudar_para(novo_status):
+            return Response(
+                {'detail': f'Não é possível mudar de "{pedido.get_status_display()}" '
+                           f'para "{Pedido.Status(novo_status).label}".'},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+
+        if novo_status == Pedido.Status.EM_PREPARO and pedido.atendente is None:
+            pedido.atendente = request.user
+
+        pedido.status = novo_status
+        pedido.save(update_fields=['status', 'atendente', 'atualizado_em'])
+        return Response(PedidoSerializer(pedido).data)
+
+    @action(detail=True, methods=['post'])
+    def cancelar(self, request, pk=None):
+        pedido = self.get_object()
+        if pedido.cliente != request.user:
+            raise PermissionDenied('Só o cliente que fez o pedido pode cancelá-lo.')
+        if pedido.status != Pedido.Status.PENDENTE:
+            return Response(
+                {'detail': 'Só é possível cancelar pedidos pendentes.'},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        pedido.status = Pedido.Status.CANCELADO
+        pedido.save(update_fields=['status', 'atualizado_em'])
+        return Response(PedidoSerializer(pedido).data)

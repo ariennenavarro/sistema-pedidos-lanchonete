@@ -14,3 +14,15 @@ class AdministradorOuSomenteLeitura(BasePermission):
         if request.method in SAFE_METHODS:
             return request.user.is_authenticated
         return eh_administrador(request.user)
+
+def eh_atendente(usuario):
+    return eh_administrador(usuario) or (
+        usuario.is_authenticated and usuario.perfil == Usuario.Perfil.ATENDENTE
+    )
+
+
+class AtendenteOuAdministrador(BasePermission):
+    message = 'Apenas atendentes podem atualizar pedidos.'
+
+    def has_permission(self, request, view):
+        return eh_atendente(request.user)

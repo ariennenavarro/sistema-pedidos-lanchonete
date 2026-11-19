@@ -59,3 +59,6 @@ class PedidoSerializer(serializers.ModelSerializer):
         for item in itens:
             ItemPedido.objects.create(pedido=pedido, **item)
         return pedido
+
+    class StatusPedidoSerializer(serializers.Serializer):
+        status = serializers.ChoiceField(choices=Pedido.Status.choices)
