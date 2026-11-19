@@ -56,6 +56,14 @@ class Pedido(models.Model):
         CARTAO = 'cartao', 'Cartão'
         PIX = 'pix', 'Pix'
 
+    TRANSICOES = {
+        Status.PENDENTE: [Status.EM_PREPARO, Status.CANCELADO],
+        Status.EM_PREPARO: [Status.PRONTO, Status.CANCELADO],
+        Status.PRONTO: [Status.ENTREGUE],
+        Status.ENTREGUE: [],
+        Status.CANCELADO: [],
+    }
+
     cliente = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -96,6 +104,9 @@ class Pedido(models.Model):
     def atualizar_total(self):
         self.total = sum(item.subtotal for item in self.itens.all())
         self.save(update_fields=['total'])
+
+    def pode_mudar_para(self, novo_status):
+        return novo_status in self.TRANSICOES.get(self.status, [])
 
 
 class ItemPedido(models.Model):
