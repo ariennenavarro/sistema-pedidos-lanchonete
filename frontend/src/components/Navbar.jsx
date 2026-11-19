@@ -41,6 +41,11 @@ export default function Navbar() {
                 </li>
               </>
             )}
+            {['atendente', 'administrador'].includes(usuario?.perfil) && (
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/painel">Painel de pedidos</NavLink>
+              </li>
+            )}
           </ul>
           <div className="d-flex align-items-center gap-2">
             {usuario ? (
