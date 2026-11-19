@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../services/api.js'
 import { moeda } from '../utils/formatar.js'
 
@@ -23,6 +24,7 @@ export default function Cardapio() {
   const [carregando, setCarregando] = useState(true)
   const [enviando, setEnviando] = useState(false)
   const [mensagem, setMensagem] = useState(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     Promise.all([api.get('/categorias/'), api.get('/produtos/')])
@@ -70,17 +72,12 @@ export default function Cardapio() {
     setEnviando(true)
     setMensagem(null)
     try {
-      const resposta = await api.post('/pedidos/', {
+      await api.post('/pedidos/', {
         forma_pagamento: formaPagamento,
         observacao,
         itens: carrinho.map((item) => ({ produto: item.produto.id, quantidade: item.quantidade })),
       })
-      setCarrinho([])
-      setObservacao('')
-      setMensagem({
-        tipo: 'success',
-        texto: `Pedido #${resposta.data.id} enviado! Total: ${moeda(resposta.data.total)}.`,
-      })
+      navigate('/meus-pedidos')
     } catch (err) {
       setMensagem({ tipo: 'danger', texto: mensagemDeErro(err.response?.data) })
     } finally {

@@ -6,6 +6,7 @@ import Cadastro from './pages/Cadastro.jsx'
 import Cardapio from './pages/Cardapio.jsx'
 import Inicio from './pages/Inicio.jsx'
 import Login from './pages/Login.jsx'
+import MeusPedidos from './pages/MeusPedidos.jsx'
 
 export default function App() {
   return (
@@ -22,6 +23,14 @@ export default function App() {
               element={
                 <RotaProtegida perfis={['cliente']}>
                   <Cardapio />
+                </RotaProtegida>
+              }
+            />
+            <Route
+              path="/meus-pedidos"
+              element={
+                <RotaProtegida perfis={['cliente']}>
+                  <MeusPedidos />
                 </RotaProtegida>
               }
             />

@@ -32,9 +32,14 @@ export default function Navbar() {
               <NavLink className="nav-link" to="/" end>Início</NavLink>
             </li>
             {usuario?.perfil === 'cliente' && (
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/cardapio">Cardápio</NavLink>
-              </li>
+              <>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/cardapio">Cardápio</NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/meus-pedidos">Meus pedidos</NavLink>
+                </li>
+              </>
             )}
           </ul>
           <div className="d-flex align-items-center gap-2">
