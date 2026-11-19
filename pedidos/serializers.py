@@ -1,8 +1,7 @@
-from rest_framework import serializers
-from .models import Categoria, Produto
 from django.db import transaction
-from .models import Categoria, ItemPedido, Pedido, Produto
+from rest_framework import serializers
 
+from .models import Categoria, ItemPedido, Pedido, Produto
 
 
 class CategoriaSerializer(serializers.ModelSerializer):
@@ -17,6 +16,7 @@ class ProdutoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Produto
         fields = ('id', 'nome', 'descricao', 'preco', 'categoria', 'categoria_nome', 'disponivel')
+
 
 class ItemPedidoSerializer(serializers.ModelSerializer):
     produto_nome = serializers.CharField(source='produto.nome', read_only=True)
@@ -60,5 +60,6 @@ class PedidoSerializer(serializers.ModelSerializer):
             ItemPedido.objects.create(pedido=pedido, **item)
         return pedido
 
-    class StatusPedidoSerializer(serializers.Serializer):
-        status = serializers.ChoiceField(choices=Pedido.Status.choices)
+
+class StatusPedidoSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=Pedido.Status.choices)
